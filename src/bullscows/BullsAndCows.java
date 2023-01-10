@@ -72,8 +72,10 @@ public class BullsAndCows {
         System.out.printf("*".repeat(secretCodeLength));
         if (symbolRange < 11) {
             System.out.printf(" (0-%d).\n", symbolRange - 1);
+        } else if (symbolRange == 11) {
+            System.out.print(" (0-9, a).\n");
         } else if (symbolRange < 37) {
-            System.out.printf(" (0-%d, a-%c).\n", symbolRange - 27, symbolRangeChar + 54);
+            System.out.printf(" (0-9, a-%c).\n", symbolRangeChar + 54);
         }
 
         // Set up game
