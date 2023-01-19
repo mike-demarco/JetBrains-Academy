@@ -37,7 +37,7 @@ public class BullsAndCows {
             if (secretCodeLength < 1 || secretCodeLength > 36) {
                 System.out.print("Error: secret code length must be between 1 and 36");
                 return;
-            }2
+            }
         } catch (Exception e) {
             System.out.println("Error: Invalid Input");
             return;
