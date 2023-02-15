@@ -6,33 +6,27 @@ import java.util.Scanner;
 
 public class AmazingNumbers {
 
-    public static void welcomeUsers() {
+    public static void printTheInstructions() {
         System.out.println("""
-            Welcome to Amazing Numbers!
-                            
-            Supported requests:
-            - enter a natural number to know its properties;
-            - enter two natural numbers to obtain the properties of the list:
-              * the first parameter represents a starting number;
-              * the second parameter shows how many consecutive numbers are to be processed;
-            - separate the parameters with one space;
-            - enter 0 to exit.""");
+                Supported requests:
+                - enter a natural number to know its properties;
+                - enter two natural numbers to obtain the properties of the list:
+                  * the first parameter represents a starting number;
+                  * the second parameter shows how many consecutive numbers are to be processed;
+                - separate the parameters with one space;
+                - enter 0 to exit.""");
     }
 
     public static String[] askForRequest(Scanner scanner) {
         System.out.println("Enter a request:");
         String[] input = scanner.nextLine().split(" ");
-        int value1 = Integer.parseInt(input[0]);
-        if (input.length > 1) {
-            int value2 = Integer.parseInt(input[1]);
-        }
         return input;
     }
 
     public static boolean[] parity(long number) {
         boolean isEven = number % 2 == 0;
         boolean isOdd = number % 2 == 1;
-        boolean[] parity = new boolean[] {isEven, isOdd};
+        boolean[] parity = new boolean[]{isEven, isOdd};
         return parity;
     }
 
@@ -45,9 +39,11 @@ public class AmazingNumbers {
 
     public static boolean duck(long number, int length) {
         boolean isDuck = false;
-        for (long i = 1; i < Math.pow(10, length); i *= 10) {
-            int index = (int) (number / i % 10);
+        int indexNumLength = 1;
+        for (long i = 1; indexNumLength < length; i *= 10) {
+            long index = number / i % 10;
             boolean check = index == 0;
+            indexNumLength = String.valueOf(i).length();
             if (check) {
                 isDuck = true;
                 break;
@@ -67,7 +63,8 @@ public class AmazingNumbers {
             if (iLength == halfNumberLength) {
                 isPalindromic = true;
                 break;
-            };
+            }
+            ;
 
             // check
             tempDigitLeft = (int) (number / Math.pow(10, numberLength - counter) % 10);
@@ -84,91 +81,112 @@ public class AmazingNumbers {
             return isGapful;
         }
 
-        char firstDigit = (char) (number / Math.pow(10, numberLength) % 10);
-        char lastDigit = (char) (number / 10 % 10);
-        String gapNumber = "" + firstDigit + lastDigit;
-        int gapNumberConcatenated = (int) gapNumber.charAt(0) * 10 + (int) gapNumber.charAt(1);
-        isGapful = gapNumberConcatenated % 12 == 0;
+        long firstDigit = (long) Math.floor(number / Math.pow(10, numberLength - 1) % 10);
+        long lastDigit = number % 10;
+        long gapNumberConcatenated = firstDigit * 10 + lastDigit;
+        long gapNumberValue = number % gapNumberConcatenated;
+        isGapful = gapNumberValue == 0;
 
         return isGapful;
     }
 
-    public static void gameLoop(long number, Scanner scanner) {
-        while (number != 0) {
-            if (number < 0) {
-                System.out.println("The first parameter should be a natural number or zero.");
-                System.out.print("Enter a request:");
-                number = scanner.nextLong();
-                continue;
-            }
-            int inputNumLength = String.valueOf(number).length();
-            List<String> propertiesList = new LinkedList<>();
-            propertiesList.add(number + " is ");
-            boolean isEven = parity(number)[0];
-            if (isEven) propertiesList.add("even");
-            boolean isOdd = parity(number)[1];
-            if (isEven) propertiesList.add("odd");
-            boolean isBuzz = buzz(number);
-            if (isEven) propertiesList.add(", buzz");
-            boolean isDuck = duck(number, inputNumLength);
-            if (isEven) propertiesList.add(", duck");
-            boolean isPalindromic = palindrome(number, inputNumLength);
-            if (isEven) propertiesList.add(", palindromic");
-            System.out.println(propertiesList);
-            System.out.print("Enter a request:");
-            number = scanner.nextLong();
-        }
+    public static void calculatePropertiesOne(long number) {
+        int inputNumLength = String.valueOf(number).length();
+        List<String> propertiesList = new LinkedList<>();
+        boolean isBuzz = buzz(number);
+        boolean isDuck = duck(number, inputNumLength);
+        boolean isPalindromic = palindrome(number, inputNumLength);
+        boolean isGapful = gap(number, inputNumLength);
+        boolean isEven = parity(number)[0];
+        boolean isOdd = parity(number)[1];
+        System.out.printf("""
+            Properties of %d
+                    buzz: %b
+                    duck: %b
+             palindromic: %b
+                    gapful: %b
+                    even: %b
+                    odd: %b
+           """, number, isBuzz, isDuck, isPalindromic, isGapful, isEven, isOdd);
     }
 
-    public static void gameLoop(long number, long count, Scanner scanner) {
-        for (int i = 0; i < count; i++) {
-            while (number != 0) {
-                if (number < 0) {
-                    System.out.println("The first parameter should be a natural number or zero.");
-                    System.out.print("Enter a request:");
-                    number = scanner.nextLong();
-                    continue;
-                }
-                int inputNumLength = String.valueOf(number).length();
-                boolean isEven = parity(number)[0];
-                boolean isOdd = parity(number)[1];
-                boolean isBuzz = buzz(number);
-                boolean isDuck = duck(number, inputNumLength);
-                boolean isPalindromic = palindrome(number, inputNumLength);
-                if (isEven, )
-                System.out.printf("%d is %b, %b, %b", number, isEven, isOdd, isBuzz, isDuck, isPalindromic);
-                System.out.print("Enter a request:");
-                number = scanner.nextLong();
-            }
-            number++;
+    public static void calculatePropertiesTwo(long number, long count) {
+        int inputNumLength;
+        List<String> propertiesList;
+        long finalNumberChecked = number + count;
+        String strList;
+
+        for (long i = number; i < finalNumberChecked; i++) {
+            inputNumLength = String.valueOf(i).length();
+            propertiesList = new LinkedList<>();
+            propertiesList.add(i + " is ");
+            boolean isBuzz = buzz(i);
+            if (isBuzz) propertiesList.add("buzz, ");
+            boolean isDuck = duck(i, inputNumLength);
+            if (isDuck) propertiesList.add("duck, ");
+            boolean isPalindromic = palindrome(i, inputNumLength);
+            if (isPalindromic) propertiesList.add("palindromic, ");
+            boolean isGapful = gap(i, inputNumLength);
+            if (isGapful) propertiesList.add("gapful, ");
+            boolean isEven = parity(i)[0];
+            if (isEven) propertiesList.add("even");
+            boolean isOdd = parity(i)[1];
+            if (isOdd) propertiesList.add("odd");
+            strList = String.join("", propertiesList);
+            System.out.println(strList);
         }
     }
 
     public static void main(String[] args) {
+        System.out.println("Welcome to Amazing Numbers!");
         boolean gameExit = false;
-        welcomeUsers();
+        boolean validInput = false;
+        long value1 = 0;
+        long value2 = 0;
+        printTheInstructions();
         Scanner scanner = new Scanner(System.in);
-        String[] input = askForRequest(scanner);
-        if (value1 == 0) gameExit = true;
-        else if (value2sEmpty()) System.out.println("The first parameter should be a natural number or zero.");
-        else if (input[0]. < 0)
-        If numbers are not natural, print an error message;
-        If one number is entered, calculate and print the properties of this number;
-        For two numbers, print the list of numbers with properties;
-        Once the request is processed, continue execution from step 3.
-
-
-
+        String[] input;
         while (!gameExit) {
-            long naturalNumberInput = Integer.parseInt(input[0]);
-            if (input.length > 1) {
-                long naturalNumberCount = Integer.parseInt(input[1]);
-                gameLoop(naturalNumberInput, naturalNumberCount, scanner);
-            } else gameLoop(naturalNumberInput, scanner);
-            input = scanner.nextLine().split(" ");
-            if (input[0].equals("0")) gameExit = true;
+            while (!validInput) {
+                try {
+                    input = askForRequest(scanner);
+                    if (input.equals("")) {
+                        printTheInstructions();
+                    }
+                    else {
+                        value1 = Long.parseLong(input[0]);
+                        // If a user enters zero, terminate the program
+                        if (value1 == 0) {
+                            validInput = true;
+                            gameExit = true;
+                        } else if (value1 < 0) { // If numbers are not natural, print an error message;
+                            System.out.println("The first parameter should be a natural number or zero.");
+                        } else {
+                            validInput = true;
+                            // If one number is entered
+                            if (input.length == 1) {
+                                // calculate and print the properties of this number;
+                                calculatePropertiesOne(value1);
+                            } else {
+                                // For two numbers, print the list of numbers with properties
+                                value2 = Long.parseLong(input[1]);
+                                if (value2 < 0) { // If numbers are not natural, print an error message;
+                                    System.out.println("The second parameter should be a natural number or zero.");
+                                } else {
+                                    calculatePropertiesTwo(value1, value2);
+                                }
+                            }
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("The first parameter should be a natural number or zero.");
+                }
+            }
+            // Once the request is processed, continue execution from step 3.
+            value1 = 0;
+            value2 = 0;
+            validInput = false;
         }
-
         System.out.print("Goodbye!");
     }
 }
