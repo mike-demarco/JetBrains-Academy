@@ -1,49 +1,22 @@
 package amazingnumbers;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class AmazingNumbers {
     static boolean gameExit = false;
     static boolean validInput = false;
-    static boolean validFilter = false;
+    static boolean validFilters = false;
     static int numOfArgs = 0;
-
-    public enum properties {
-        EVEN,
-        ODD,
-        BUZZ,
-        DUCK,
-        PALINDROMIC,
-        GAPFUL,
-        SPY,
-        SQUARE,
-        SUNNY,
-        JUMPING;
+    public enum FilterEnum {
+        EVEN, ODD, BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY, JUMPING;
     }
-
-    String property;
-
-    properties(String property) {
-        this.property = property;
-    }
-
-
-    // Build the set.
-    final Set<String> mySet = Arrays.stream(properties.values()).map(Enum::name).collect(Collectors.toSet());
-
-    static String availablePropertiesString =
-            "Available properties: [EVEN, ODD, BUZZ, DUCK, PALINDROMIC, GAPFUL, SPY, SQUARE, SUNNY, JUMPING]";
-
+    static String filterEnumString = Arrays.toString(FilterEnum.values());
     static long value1 = 0;
     static long value2 = 0;
-    static boolean anotherPropertyExists = true;
-    static List<String> filterList = new ArrayList<String>();
+    static List<String> filterList = new ArrayList<>(); // working list of filters to check against
     static String propertyFilter = null;
-
     static int inputNumberLength = 0;
-    static List<String> printedPropertiesString = new ArrayList<String>();
-
+    static List<String> printedPropertiesString = new ArrayList<>();
     static Scanner scanner = new Scanner(System.in);
     static String[] input;
 
@@ -165,38 +138,37 @@ public class AmazingNumbers {
     }
 
     public static boolean isJumping(long inputNumber, int inputNumberLength) {
-        int tempDigitLeft, tempDigitRight, iLength;
+        // Single-digit numbers are considered Jumping numbers.
+        if (inputNumberLength == 1) {
+            return true;
+        }
+        int tempDigitLeft, tempDigitRight;
+        int indexCount = 1;
+        boolean jumping = true;
 
         for (long i = 1; i < Math.pow(10, inputNumberLength - 1); i *= 10) {
             // check
-            tempDigitLeft = (int) (inputNumber / Math.pow(10, inputNumberLength - i) % 10);
-            tempDigitRight = (int) (inputNumber / Math.pow(10, inputNumberLength - i - 1) % 10);
-            if (tempDigitLeft == tempDigitRight + 1 || tempDigitLeft == tempDigitRight - 1) {
-                return true;
+            tempDigitLeft = (int) (inputNumber / Math.pow(10, inputNumberLength - indexCount) % 10);
+            tempDigitRight = (int) (inputNumber / Math.pow(10, inputNumberLength - indexCount - 1) % 10);
+            if (tempDigitLeft != tempDigitRight + 1 && tempDigitLeft != tempDigitRight - 1) {
+                jumping = false;
+                break;
             }
+            indexCount++;
         }
-        return false;
+        return jumping;
     }
 
     public static boolean validProperty(String property) {
         // If a user inputs an incorrect property,
         // print the error message and the list of available properties;
         // property names include even, odd, buzz, duck, palindromic, gapful, spy, and sunny
-        if (properties.contains(property.toUpperCase(Locale.ROOT))) {
-            return true;
-        } else {
-            return false;
-        }
+        return filterEnumString.contains(property.toUpperCase(Locale.ROOT));
     }
 
     public static void propertyError(String property) {
         String capitalProperty = property.toUpperCase(Locale.ROOT);
-        System.out.println("The property [" + capitalProperty + "] is wrong.\n" + availableProperties);
-    }
-
-    public static void propertyError(String propertyA, String propertyB) {
-        String masterKey = propertyA.toUpperCase() + ", " + propertyB.toUpperCase();
-        System.out.println("The properties [" + masterKey + "] are wrong.\n" + availableProperties);
+        System.out.println("The property [" + capitalProperty + "] is wrong.\nAvailable properties: [" + filterEnumString + "]");
     }
 
     public static boolean mutuallyExclusive(String first, String second) {
@@ -208,47 +180,99 @@ public class AmazingNumbers {
 
     public static void mutuallyExclusiveError(String first, String second) {
         System.out.printf("The request contains mutually exclusive properties: [%s, %s]\n" +
-                "There are no numbers with these properties.", first, second);
+                "There are no numbers with these properties.\n", first, second);
     }
 
-    public static void propertiesCheck(List<String> propertiesList, long i) {
+    public static void propertiesCheck(long i) {
         inputNumberLength = String.valueOf(i).length();
-        propertiesList.add(i + " is ");
-        boolean isBuzz = isBuzz(i);
-        if (isBuzz) {
-            propertiesList.add("buzz, ");
+        printedPropertiesString.add(i + " is ");
+
+        if (isBuzz(i)) {
+            printedPropertiesString.add("buzz, ");
         }
-        boolean isDuck = isDuck(i, inputNumberLength);
-        if (isDuck) {
-            propertiesList.add("duck, ");
+        if (isDuck(i, inputNumberLength)) {
+            printedPropertiesString.add("duck, ");
         }
-        boolean isPalindromic = isPalindrome(i, inputNumberLength);
-        if (isPalindromic) {
-            propertiesList.add("palindromic, ");
+        if (isPalindrome(i, inputNumberLength)) {
+            printedPropertiesString.add("palindromic, ");
         }
-        boolean isGapful = isGap(i, inputNumberLength);
-        if (isGapful) {
-            propertiesList.add("gapful, ");
+        if (isGap(i, inputNumberLength)) {
+            printedPropertiesString.add("gapful, ");
         }
-        boolean isSpy = isSpy(i, inputNumberLength);
-        if (isSpy) {
-            propertiesList.add("spy, ");
+        if (isSpy(i, inputNumberLength)) {
+            printedPropertiesString.add("spy, ");
         }
-        boolean isSquare = isSquare(i);
-        if (isSquare) {
-            propertiesList.add("square, ");
+        if (isSquare(i)) {
+            printedPropertiesString.add("square, ");
         }
-        boolean isSunny = isSunny(i);
-        if (isSunny) {
-            propertiesList.add("sunny, ");
+        if (isSunny(i)) {
+            printedPropertiesString.add("sunny, ");
         }
-        boolean isEven = parity(i)[0];
-        if (isEven) {
-            propertiesList.add("even");
+        if (isJumping(i, inputNumberLength)) {
+            printedPropertiesString.add("jumping, ");
         }
-        boolean isOdd = parity(i)[1];
-        if (isOdd) {
-            propertiesList.add("odd");
+        if (parity(i)[0]) {
+            printedPropertiesString.add("even");
+        }
+        if (parity(i)[1]) {
+            printedPropertiesString.add("odd");
+        }
+    }
+
+    public static boolean propertyCheck(long i, String property) {
+        inputNumberLength = String.valueOf(i).length();
+
+        switch (property) {
+            case buzz:
+                if (isBuzz(i)) {
+                    return true;
+                }
+                break;
+            case duck:
+                if (isDuck(i, inputNumberLength)) {
+                    return true;
+                }
+                break;
+            case palindrome:
+                if (isPalindrome(i, inputNumberLength)) {
+                    return true;
+                }
+                break;
+            case gap:
+                if (isGap(i, inputNumberLength)) {
+                    return true;
+                }
+                break;
+            case spy:
+                if (isSpy(i, inputNumberLength)) {
+                    return true;
+                }
+                break;
+            case square:
+                if (isSquare(i)) {
+                    return true;
+                }
+                break;
+            case sunny:
+                if (isSunny(i)) {
+                    return true;
+                }
+                break;
+            case jumping:
+                if (isJumping(i, inputNumberLength)) {
+                    return true;
+                }
+                break;
+            case even:
+                if (parity(i)[0]) {
+                    return true;
+                }
+                break;
+            case odd:
+                if (parity(i)[1]) {
+                    return true;
+                }
+                break;
         }
     }
 
@@ -259,13 +283,13 @@ public class AmazingNumbers {
                          buzz: %b
                          duck: %b
                   palindromic: %b
-                         gapful: %b
-                         spy: %b
-                         square: %b
-                         sunny: %b
-                         jumping: %b
+                       gapful: %b
+                          spy: %b
+                       square: %b
+                        sunny: %b
+                      jumping: %b
                          even: %b
-                         odd: %b
+                          odd: %b
                 """, inputNumber, isBuzz(inputNumber), isDuck(inputNumber, inputNumberLength),
                 isPalindrome(inputNumber, inputNumberLength), isGap(inputNumber, inputNumberLength),
                 isSpy(inputNumber, inputNumberLength), isSquare(inputNumber), isSunny(inputNumber),
@@ -274,28 +298,36 @@ public class AmazingNumbers {
 
     public static void calculatePropertiesTwo(long number, long count) {
         long finalNumberChecked = number + count;
-        String strList;
 
         for (long i = number; i < finalNumberChecked; i++) {
-            propertiesCheck(filterList, i);
-            strList = String.join("", filterList);
-            System.out.println(strList);
-            filterList.clear();
+            propertiesCheck(i);
+            System.out.println(String.join("", printedPropertiesString));
+            printedPropertiesString.clear();
         }
     }
 
     public static void calculatePropertiesFiltered(long number, long count, List filterList) {
-        long matchCount = 0;
-        String strList;
+        long printedNumberCount = 0;
+        boolean matchesFilterList = true;
 
-        for (long i = number; matchCount < count; i++) {
-            propertiesCheck(filterList, i);
-            strList = String.join("", filterList);
-            if (strList.contains(filterList[i].toLowerCase()) && strList.contains(filterB.toLowerCase())) {
-                System.out.println(strList);
-                matchCount++;
+        // for each number
+        // run the properties check
+        // if all properties are found in the filter
+        //     print the properties string
+        for (long i = number; printedNumberCount < count; i++) {
+            propertiesCheck(i);
+            for (Object filter : filterList) {
+                if (!printedPropertiesString.contains(filter)) {
+                    matchesFilterList = false;
+                    break;
+                }
             }
-            filterList.clear();
+            if (matchesFilterList) {
+                System.out.println(String.join("", printedPropertiesString));
+                printedPropertiesString.clear();
+                printedNumberCount++;
+            }
+            matchesFilterList = true;
         }
     }
 
@@ -303,7 +335,6 @@ public class AmazingNumbers {
         System.out.println("Welcome to Amazing Numbers!");
         printTheInstructions();
 
-        System.out.print("Goodbye!");
         while (!gameExit) {
             while (!validInput) {
                 try {
@@ -337,31 +368,35 @@ public class AmazingNumbers {
                             }
                         }
                         if (numOfArgs > 2 && !validInput) { // For numbers in range, handle filter(s) given
-                            for (int i = 2; i < numOfArgs; i++) {
+                            for (int i = 2; i < numOfArgs; i++) { // Starting position, input arg 3, the first filter
                                 // check validity of each filter
                                 propertyFilter = input[i];
                                 if (!validProperty(propertyFilter)) {
                                     propertyError(propertyFilter);
-                                    validFilter = false;
+                                    validFilters = false;
                                     break;
                                 } else { // add filter to list
                                     filterList.add(input[i]);
-                                    validFilter = true;
+                                    validFilters = true;
                                 }
                             }
                             int numOfFilters = filterList.size();
-                            if (validFilter) {
+                            if (validFilters && numOfFilters > 1) { // check all combinations of filters for mutually exclusive pairs
                                 for (int i = 0; i < numOfFilters; i++) {
+                                    if (!validFilters) {
+                                        filterList.clear();
+                                        break;
+                                    }
                                     for (int j = i + 1; j < numOfFilters; j++) {
                                         if (mutuallyExclusive(filterList.get(i), filterList.get(j))) {
                                             mutuallyExclusiveError(filterList.get(i), filterList.get(j));
-                                            validFilter = true;
+                                            validFilters = false;
                                             break;
                                         }
                                     }
                                 }
                             }
-                            if (validFilter) { // calculate and print the properties of this number range;
+                            if (validFilters) { // calculate and print the properties of this number range;
                                 validInput = true;
                                 calculatePropertiesFiltered(value1, value2, filterList);
                             }
@@ -371,36 +406,14 @@ public class AmazingNumbers {
                     System.out.println("The first parameter should be a natural number or zero.");
                 }
             }
+            // Once the request is processed, continue execution from step 3. Reset static variables
+            value1 = 0;
+            value2 = 0;
+            propertyFilter = null;
+            validInput = false;
+            validFilters = true;
+            inputNumberLength = 0;
         }
-        // Once the request is processed, continue execution from step 3.
-        value1 = 0;
-        value2 = 0;
-        propertyFilter = null;
-        validInput = false;
-        inputNumberLength = 0;
-    }
-        switch (propertyFilter) {
-        case EVEN:
-            break;
-        case ODD:
-            break;
-        case BUZZ:
-            break;
-        case DUCK:
-            break;
-        case PALINDROMIC:
-            break;
-        case GAPFUL:
-            break;
-        case SPY:
-            break;
-        case SQUARE:
-            break;
-        case SUNNY:
-            break;
-        case JUMPING:
-            break;
-        default:
-            System.out.println(availablePropertiesString);
+        System.out.print("Goodbye!");
     }
 }
