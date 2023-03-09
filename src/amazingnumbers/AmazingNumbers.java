@@ -4,7 +4,7 @@ import java.util.*;
 
 public class AmazingNumbers {
     static boolean gameExit = false;
-    static boolean validInput = false;
+    static boolean inputProcessingComplete = false;
     static boolean validFilters = false;
     static int numOfArgs = 0;
     public enum FilterEnum {
@@ -30,6 +30,14 @@ public class AmazingNumbers {
                 - two natural numbers and two properties to search for;
                 - separate the parameters with one space;
                 - enter 0 to exit.""");
+    }
+
+    public static Long convertStringToLong(String str) {
+        try {
+            return Long.valueOf(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     public static String[] askForRequest(Scanner scanner) {
@@ -166,9 +174,21 @@ public class AmazingNumbers {
         return filterEnumString.contains(property.toUpperCase(Locale.ROOT));
     }
 
-    public static void propertyError(String property) {
-        String capitalProperty = property.toUpperCase(Locale.ROOT);
-        System.out.println("The property [" + capitalProperty + "] is wrong.\nAvailable properties: [" + filterEnumString + "]");
+    public static void propertyError(List properties) {
+        if (properties.size() == 1) {
+            String filter = (String) properties.get(0);
+            String capitalFilter = filter.toUpperCase(Locale.ROOT);
+            System.out.println("The property [" + capitalFilter + "] is wrong.\nAvailable properties: " + filterEnumString);
+        } else {
+            List<String> filterList = new ArrayList<>();
+            for (Object filter : properties) {
+                String filterString = (String) filter;
+                String capitalProperty = filterString.toUpperCase(Locale.ROOT);
+                filterList.add(capitalProperty);
+            }
+            System.out.println("The properties " + filterList + " are wrong.\nAvailable properties: " + filterEnumString);
+            filterList.clear();
+        }
     }
 
     public static boolean mutuallyExclusive(String first, String second) {
@@ -223,57 +243,60 @@ public class AmazingNumbers {
         inputNumberLength = String.valueOf(i).length();
 
         switch (property) {
-            case buzz:
+            case "buzz":
                 if (isBuzz(i)) {
                     return true;
                 }
                 break;
-            case duck:
+            case "duck":
                 if (isDuck(i, inputNumberLength)) {
                     return true;
                 }
                 break;
-            case palindrome:
+            case "palindrome":
                 if (isPalindrome(i, inputNumberLength)) {
                     return true;
                 }
                 break;
-            case gap:
+            case "gap":
                 if (isGap(i, inputNumberLength)) {
                     return true;
                 }
                 break;
-            case spy:
+            case "spy":
                 if (isSpy(i, inputNumberLength)) {
                     return true;
                 }
                 break;
-            case square:
+            case "square":
                 if (isSquare(i)) {
                     return true;
                 }
                 break;
-            case sunny:
+            case "sunny":
                 if (isSunny(i)) {
                     return true;
                 }
                 break;
-            case jumping:
+            case "jumping":
                 if (isJumping(i, inputNumberLength)) {
                     return true;
                 }
                 break;
-            case even:
+            case "even":
                 if (parity(i)[0]) {
                     return true;
                 }
                 break;
-            case odd:
+            case "odd":
                 if (parity(i)[1]) {
                     return true;
                 }
                 break;
+            default:
+                return false;
         }
+        return false;
     }
 
     public static void calculatePropertiesOne(long inputNumber) {
@@ -309,20 +332,21 @@ public class AmazingNumbers {
     public static void calculatePropertiesFiltered(long number, long count, List filterList) {
         long printedNumberCount = 0;
         boolean matchesFilterList = true;
+        int filterCount = filterList.size();
 
         // for each number
-        // run the properties check
-        // if all properties are found in the filter
-        //     print the properties string
+        //      for each filter in given list
+        //          if number has all filters
+        //              run properties list, generate string, print
         for (long i = number; printedNumberCount < count; i++) {
-            propertiesCheck(i);
             for (Object filter : filterList) {
-                if (!printedPropertiesString.contains(filter)) {
+                if (!propertyCheck(i, (String) filter)) {
                     matchesFilterList = false;
                     break;
                 }
             }
             if (matchesFilterList) {
+                propertiesCheck(i);
                 System.out.println(String.join("", printedPropertiesString));
                 printedPropertiesString.clear();
                 printedNumberCount++;
@@ -336,57 +360,55 @@ public class AmazingNumbers {
         printTheInstructions();
 
         while (!gameExit) {
-            while (!validInput) {
+            while (!inputProcessingComplete) {
                 try {
                     input = askForRequest(scanner);
                     if (input.equals("")) {
                         printTheInstructions();
                     } else {
                         if (numOfArgs > 0) { // If one number is entered
-                            value1 = Long.parseLong(input[0]);
+                            value1 = convertStringToLong(input[0]);
                             if (value1 == 0) { // If a user enters zero, terminate the program
-                                validInput = true;
+                                inputProcessingComplete = true;
                                 gameExit = true;
                             } else if (value1 < 0) { // If numbers are not natural, print an error message
                                 System.out.println("The first parameter should be a natural number or zero.");
                             } else {
                                 if (numOfArgs == 1) { // calculate and print the properties of this number;
-                                    validInput = true;
+                                    inputProcessingComplete = true;
                                     calculatePropertiesOne(value1);
                                 }
                             }
                         }
-                        if (numOfArgs > 1 && !validInput) { // If two numbers are entered
-                            value2 = Long.parseLong(input[1]);
+                        if (numOfArgs > 1 && !inputProcessingComplete) { // If two numbers are entered
+                            value2 = convertStringToLong(input[1]);
                             if (value2 < 0) { // If numbers are not natural, print an error message
                                 System.out.println("The second parameter should be a natural number or zero.");
                             } else {
                                 if (numOfArgs == 2) { // calculate and print properties of this number range
-                                    validInput = true;
+                                    inputProcessingComplete = true;
                                     calculatePropertiesTwo(value1, value2);
                                 }
                             }
                         }
-                        if (numOfArgs > 2 && !validInput) { // For numbers in range, handle filter(s) given
+                        if (numOfArgs > 2 && !inputProcessingComplete) { // For numbers in range, handle filter(s) given
                             for (int i = 2; i < numOfArgs; i++) { // Starting position, input arg 3, the first filter
                                 // check validity of each filter
                                 propertyFilter = input[i];
                                 if (!validProperty(propertyFilter)) {
-                                    propertyError(propertyFilter);
+                                    filterList.add(propertyFilter);
                                     validFilters = false;
-                                    break;
                                 } else { // add filter to list
-                                    filterList.add(input[i]);
+                                    filterList.add(propertyFilter);
                                     validFilters = true;
                                 }
+                            }
+                            if (!validFilters) {
+                                propertyError(filterList);
                             }
                             int numOfFilters = filterList.size();
                             if (validFilters && numOfFilters > 1) { // check all combinations of filters for mutually exclusive pairs
                                 for (int i = 0; i < numOfFilters; i++) {
-                                    if (!validFilters) {
-                                        filterList.clear();
-                                        break;
-                                    }
                                     for (int j = i + 1; j < numOfFilters; j++) {
                                         if (mutuallyExclusive(filterList.get(i), filterList.get(j))) {
                                             mutuallyExclusiveError(filterList.get(i), filterList.get(j));
@@ -394,10 +416,14 @@ public class AmazingNumbers {
                                             break;
                                         }
                                     }
+                                    if (!validFilters) {
+                                        filterList.clear();
+                                        break;
+                                    }
                                 }
                             }
                             if (validFilters) { // calculate and print the properties of this number range;
-                                validInput = true;
+                                inputProcessingComplete = true;
                                 calculatePropertiesFiltered(value1, value2, filterList);
                             }
                         }
@@ -410,7 +436,7 @@ public class AmazingNumbers {
             value1 = 0;
             value2 = 0;
             propertyFilter = null;
-            validInput = false;
+            inputProcessingComplete = false;
             validFilters = true;
             inputNumberLength = 0;
         }
