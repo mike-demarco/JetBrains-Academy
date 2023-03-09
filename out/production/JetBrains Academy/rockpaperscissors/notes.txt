@@ -1,0 +1,15 @@
+Enter the name
+Enter list of the options separated by a comma.
+	For example: rock,paper,scissors,lizard,spock
+	If users input an empty line
+		start the game with default options: rock, paper, and scissors.
+
+Once the game options are defined
+	output 'Okay, let's start.'
+
+If opposed to self
+	Draw
+If one half of the other options
+	Win
+If another half
+	Loss
